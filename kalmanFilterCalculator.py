@@ -28,7 +28,7 @@ Q = np.diag([0.01, 0.01, 0.1, 0.1])  # Process noise covariance
 u = np.array([0.2, 0.2])  # Control input (acceleration)
 z = np.array([0.95, 1.05])  # Measured positions (with noise)
 
-def kalman_filter(x,P,A,H,R,Q,B,u,z):
+def kalman_filter(): #kalman_filter(x,P,A,H,R,Q,B,u,z)
     x_pred = A @ x + B @ u # State Predicted
     P_pred = A @ P @ A.T + Q # Covariance Prediction
 
@@ -39,17 +39,27 @@ def kalman_filter(x,P,A,H,R,Q,B,u,z):
 
     return x_updated, P_updated
 
+def track_position(s):
+    positions = []
+    for i in range(s):
+        x, P = kalman_filter()
+        positions.append((x[0], x[1]))
+        print(f"Step {i+1}: Position (x, y) = ({x[0]:.2f},{x[1]:.2f})")
+
 def kalman_print(K):
-    x_updated,P_updated = K
+    x,P = K
     print("Updated State Vector:")
-    print(f"x: {x_updated[0]}")
-    print(f"y: {x_updated[1]}")
-    print(f"v_x: {x_updated[2]}")
-    print(f"v_y: {x_updated[3]}")
+    print(f"x: {x[0]}")
+    print(f"y: {x[1]}")
+    print(f"v_x: {x[2]}")
+    print(f"v_y: {x[3]}")
     
     print("\nUpdated Covariance Matrix:")
     for i in range(4):
         for j in range(4):
-            print(f"P[{i},{j}]: {P_updated[i, j]}")
+            print(f"P[{i},{j}]: {P[i, j]}")
 
-kalman_print(kalman_filter(x,P,A,H,R,Q,B,u,z))
+
+s = None
+# track_position(s)
+# kalman_print(kalman_filter())
