@@ -28,18 +28,28 @@ Q = np.diag([0.01, 0.01, 0.1, 0.1])  # Process noise covariance
 u = np.array([0.2, 0.2])  # Control input (acceleration)
 z = np.array([0.95, 1.05])  # Measured positions (with noise)
 
-# Prediction step
-x_pred = A @ x + B @ u
-P_pred = A @ P @ A.T + Q
+def kalman_filter(x,P,A,H,R,Q,B,u,z):
+    x_pred = A @ x + B @ u # State Predicted
+    P_pred = A @ P @ A.T + Q # Covariance Prediction
 
-# Update step
-y = z - H @ x_pred  # Innovation
-S = H @ P_pred @ H.T + R  # Innovation covariance
-K = P_pred @ H.T @ np.linalg.inv(S) # Kalman gain
-x_updated = x_pred + K @ y
-P_updated = (np.eye(4) - K @ H) @ P_pred
+    I = np.eye(A.shape[0])
+    K = P_pred @ H.T @ np.linalg.inv(H @ P_pred @ H.T + R) # Kalman Gain Calculation
+    x_updated = x_pred + K @ (z - H @ x_pred) # State Update
+    P_updated = (I - K @ H) @ P_pred # Covariance Update
 
-print("Predicted State (x_pred):\n", x_pred)
-print("\nPredicted Covariance (P_pred):\n", P_pred)
-print("\nUpdated State (x_updated):\n", x_updated)
-print("\nUpdated Covariance (P_updated):\n", P_updated)
+    return x_updated, P_updated
+
+def kalman_print(K):
+    x_updated,P_updated = K
+    print("Updated State Vector:")
+    print(f"x: {x_updated[0]}")
+    print(f"y: {x_updated[1]}")
+    print(f"v_x: {x_updated[2]}")
+    print(f"v_y: {x_updated[3]}")
+    
+    print("\nUpdated Covariance Matrix:")
+    for i in range(4):
+        for j in range(4):
+            print(f"P[{i},{j}]: {P_updated[i, j]}")
+
+kalman_print(kalman_filter(x,P,A,H,R,Q,B,u,z))
